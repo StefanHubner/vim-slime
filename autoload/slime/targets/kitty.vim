@@ -3,10 +3,20 @@ function! slime#targets#kitty#config() abort
   if !exists("b:slime_config")
     let b:slime_config = {"window_id": 1, "listen_on": $KITTY_LISTEN_ON}
   end
-  let b:slime_config["window_id"] = str2nr(slime#common#system("kitty @ select-window --self", []))
-  if v:shell_error || b:slime_config["window_id"] == $KITTY_WINDOW_ID
-    let b:slime_config["window_id"] = input("kitty window_id ($KITTY_WINDOW_ID): ", b:slime_config["window_id"])
-  endif
+
+  try
+    let l:window_id = str2nr(system("kitty @ ls | jq -r '.[] | select(.is_focused) | .id'"))
+    if v:shell_error || l:window_id == 0
+      throw 'Error retrieving window ID'
+    endif
+  catch
+    " Prompt user to input window ID if command fails
+    let l:window_id = input("kitty window_id (current ID is $KITTY_WINDOW_ID): ", $KITTY_WINDOW_ID)
+  endtry
+
+  let b:slime_config["window_id"] = l:window_id
+
+  " Prompt user to confirm or change the listen_on address
   let b:slime_config["listen_on"] = input("kitty listen on ($KITTY_LISTEN_ON): ", b:slime_config["listen_on"])
 endfunction
 
