@@ -1,6 +1,4 @@
 
-" GHC before 8.0.1 does not support top-level bindings
-let g:slime_config_defaults["haskell_ghci_add_let"] = 1
 
 " Remove '>' on line beginning in literate haskell
 function! s:Remove_initial_gt(lines)
